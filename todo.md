@@ -1,0 +1,31 @@
+# Project TODO
+
+- [x] Define tenant, practice service, business-hour, knowledge, customer, appointment, availability, call, transcript, tool-event, and confirmation database tables.
+- [x] Apply and verify the initial database migration with tenant-isolated relationships and UTC timestamps.
+- [x] Add deterministic dental availability queries that only return persisted, valid appointment slots.
+- [x] Add deterministic booking creation, rescheduling, and cancellation operations with conflict checks and audit records.
+- [x] Add tenant-grounded knowledge lookup for opening hours, services, pricing, location, parking, and policies.
+- [x] Add LLM-assisted intent classification, entity extraction, conversational context, and natural response drafting with validated-tool-result guardrails.
+- [x] Add explicit human-handoff rules for requests, complaints, repeated misunderstandings, low confidence, sensitive matters, and unavailable tools.
+- [x] Add provider-independent confirmation records and adapters for in-app and future email delivery.
+- [x] Add microphone recording and server-side transcription to feed spoken utterances into the same validated call workflow.
+- [x] Build an elegant responsive application shell with practice navigation and clear operational status.
+- [x] Build a live typed and spoken call simulator showing call state, transcript, intent, extracted details, tool outcomes, and escalation controls.
+- [x] Build a dental operations dashboard with today’s schedule, booking statuses, recent calls, handoff context, and core metrics.
+- [x] Build practice configuration views for profile, services, hours, booking and cancellation rules, knowledge, voice, and integration adapters.
+- [x] Build call-history and audit views with summaries, intents, booking references, tool outcomes, and escalations.
+- [x] Add accessible loading, empty, success, error, and responsive states across the application.
+- [x] Add Vitest coverage for intent routing, tenant-grounded knowledge, availability validation, booking conflicts, confirmations, and escalation behavior.
+- [x] Run TypeScript checks, automated tests, and a production build; resolve all failures.
+- [x] Visually verify the principal desktop and mobile workflows and refine the presentation.
+- [x] Review this checklist, mark completed work, and save the final project checkpoint.
+- [x] Add explicit persisted availability-capacity records and make slot generation depend on them as well as business hours and bookings.
+- [x] Fix and browser-verify the live structured LLM classification and extraction path without deterministic fallback.
+- [x] Add service-detail grounding and automatic handoff when a required transactional tool or backend is unavailable.
+- [x] Add a dedicated voice configuration view showing browser speech, transcription, and future provider adapter settings.
+- [x] Add explicit configuration and call-history error states and revalidate responsive behavior.
+- [x] Re-run tests and production build, review the checklist again, and save the final checkpoint.
+- [x] Make persisted availability capacity authoritative by comparing overlapping confirmed bookings with each slot’s capacity.
+- [x] Re-run final validation, review the completed checklist, and save the delivery checkpoint.
+- [x] Exclude the current appointment from capacity consumption while validating a reschedule target.
+- [x] Complete the final validation review and save the delivery checkpoint.

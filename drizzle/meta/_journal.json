@@ -1,5 +1,27 @@
 {
   "version": "7",
   "dialect": "mysql",
-  "entries": []
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1788101782789,
+      "tag": "0000_clear_yellow_claw",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1788102140093,
+      "tag": "0001_wandering_tony_stark",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1788103698727,
+      "tag": "0002_dazzling_hiroim",
+      "breakpoints": true
+    }
+  ]
 }
