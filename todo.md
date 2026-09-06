@@ -29,7 +29,7 @@
 - [x] Re-run final validation, review the completed checklist, and save the delivery checkpoint.
 - [x] Exclude the current appointment from capacity consumption while validating a reschedule target.
 - [x] Complete the final validation review and save the delivery checkpoint.
-- [ ] Create the requested private GitHub repository because the supplied destination does not yet exist, then verify access and its default branch.
+- [x] Verify access to the requested GitHub repository and its default branch after the user created it.
 - [x] Confirm the source export excludes secrets, dependencies, logs, and generated build artifacts.
-- [ ] Push the completed application source to the requested GitHub repository.
-- [ ] Verify the remote branch and commit, then report the repository result.
+- [x] Push the completed application source to the requested GitHub repository.
+- [x] Verify the remote branch and commit, then report the repository result.
