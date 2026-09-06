@@ -33,3 +33,7 @@
 - [x] Confirm the source export excludes secrets, dependencies, logs, and generated build artifacts.
 - [x] Push the completed application source to the requested GitHub repository.
 - [x] Verify the remote branch and commit, then report the repository result.
+- [x] Reproduce why agent replies are not automatically spoken in the browser simulator.
+- [x] Fix speech synthesis and playback controls with clear browser support and permission feedback.
+- [x] Add regression coverage for voice-response state and verify typed and microphone call flows.
+- [x] Run final checks, publish the voice-response fix, and synchronize GitHub.

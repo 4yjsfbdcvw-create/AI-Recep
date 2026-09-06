@@ -35,3 +35,11 @@ After adding persisted tenant availability slots and correcting the live JSON sc
 The live model classified “Do you have a dental hygiene appointment available tomorrow at 11:30?” as `CHECK_AVAILABILITY` with 92% confidence and extracted the configured service, ISO date, and time without fallback. Clara then checked the persisted tenant availability ledger, recorded a successful authoritative tool event, and offered the slot without creating a booking or inventing a transaction.
 
 The practice setup now exposes a dedicated Voice tab. Browser verification shows active built-in transcription and browser speech adapters, plus clear provider-ready guidance for future telephony and TTS implementations. The configuration, audit, and simulator pages were also rechecked at a 390 × 844 responsive viewport.
+
+## Automatic browser voice response fix
+
+The original simulator only spoke an agent message after the user manually pressed the headphones replay button; new agent replies did not trigger speech automatically. Automatic speech synthesis, mute/unmute, replay, British-English voice preference, and playback status are now implemented. The sandbox browser exposes the Web Speech API but has zero installed voices, so it correctly reports “voice unavailable,” provides a retry control, and keeps the transcript and call workflow operational without repeatedly showing playback errors. Unit coverage now verifies latest-agent-message selection, preferred voice selection, and actionable failure guidance.
+
+Live verification call `CALL-DA6E9DF8` showed the precise no-device-voice guidance, a dedicated retry action, and a stable text fallback. A typed opening-hours question completed successfully with a tenant-grounded answer and tool evidence, and did not produce a second automatic playback error after the initial capability failure. The simulator’s responsive entry state was rechecked at 390 × 844.
+
+The microphone control was also rechecked in verification call `CALL-379984A9`. The sandbox has no available microphone device, and the simulator correctly preserved the active call while showing a recoverable “continue with typed messages” notice. This confirms microphone permission/device failures remain isolated from the new outgoing speech-response path.
