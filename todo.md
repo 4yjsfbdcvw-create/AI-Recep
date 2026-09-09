@@ -37,3 +37,11 @@
 - [x] Fix speech synthesis and playback controls with clear browser support and permission feedback.
 - [x] Add regression coverage for voice-response state and verify typed and microphone call flows.
 - [x] Run final checks, publish the voice-response fix, and synchronize GitHub.
+- [x] Inspect the available ElevenLabs integration and choose a natural female voice configuration.
+- [x] Add a secure server-side ElevenLabs text-to-speech adapter without exposing credentials to the browser.
+- [x] Automatically play ElevenLabs audio for new Clara replies, with mute, replay, loading, and browser-TTS fallback behavior.
+- [x] Add voice-provider configuration and clear error or quota feedback in the practice setup workspace.
+- [x] Add tests for TTS request validation, provider fallback, and client audio state.
+- [x] Run final checks and browser verification, publish the ElevenLabs voice upgrade, and synchronize GitHub.
+- [x] Add explicit ElevenLabs quota and credit-exhaustion handling with distinct practice-setup guidance and browser fallback messaging.
+- [ ] Commit and push the validated ElevenLabs upgrade to GitHub, verify the remote SHA, and save the published checkpoint.

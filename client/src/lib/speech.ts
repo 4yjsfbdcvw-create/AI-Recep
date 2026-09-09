@@ -33,3 +33,9 @@ export function speechPlaybackErrorMessage(errorCode: string, availableVoiceCoun
   }
   return "The spoken reply could not be played. You can retry with the voice button or continue using the transcript.";
 }
+
+export function createAudioDataUrl(mimeType: string, audioBase64: string) {
+  const safeMimeType = /^audio\/[a-z0-9.+-]+$/i.test(mimeType) ? mimeType : "audio/mpeg";
+  if (!audioBase64.trim()) throw new Error("Generated speech audio is empty.");
+  return `data:${safeMimeType};base64,${audioBase64}`;
+}

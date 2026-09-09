@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { latestAgentMessage, selectPreferredVoice, speechPlaybackErrorMessage } from "./speech";
+import { createAudioDataUrl, latestAgentMessage, selectPreferredVoice, speechPlaybackErrorMessage } from "./speech";
+import { voiceProviderGuidance } from "@shared/voice";
 
 describe("browser voice response helpers", () => {
   it("selects the newest agent reply instead of repeating the customer utterance", () => {
@@ -23,5 +24,16 @@ describe("browser voice response helpers", () => {
   it("gives actionable feedback when the device has no speech voice", () => {
     expect(speechPlaybackErrorMessage("synthesis-failed", 0)).toContain("Install an English system voice");
     expect(speechPlaybackErrorMessage("not-allowed", 2)).toContain("blocked spoken replies");
+  });
+
+  it("creates a safe playable data URL for generated ElevenLabs audio", () => {
+    expect(createAudioDataUrl("audio/mpeg", "YWJj")).toBe("data:audio/mpeg;base64,YWJj");
+    expect(createAudioDataUrl("text/html", "YWJj")).toBe("data:audio/mpeg;base64,YWJj");
+    expect(() => createAudioDataUrl("audio/mpeg", "")).toThrow("empty");
+  });
+
+  it("distinguishes provider quota exhaustion from temporary unavailability", () => {
+    expect(voiceProviderGuidance("quota_exceeded insufficient credits").issue).toBe("quota");
+    expect(voiceProviderGuidance("upstream timeout").issue).toBe("unavailable");
   });
 });

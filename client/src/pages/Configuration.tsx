@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { trpc } from "@/lib/trpc";
@@ -22,12 +23,14 @@ import {
 } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { voiceProviderGuidance } from "@shared/voice";
 
 const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 export default function Configuration() {
   const utils = trpc.useUtils();
   const { data, isLoading, error, refetch } = trpc.configuration.get.useQuery();
+  const voices = trpc.configuration.voices.useQuery(undefined, { retry: false });
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -61,6 +64,13 @@ export default function Configuration() {
     },
     onError: mutationError => toast.error(mutationError.message),
   });
+  const updateVoice = trpc.configuration.updateVoice.useMutation({
+    onSuccess: async () => {
+      await utils.configuration.get.invalidate();
+      toast.success("Clara’s ElevenLabs voice updated");
+    },
+    onError: mutationError => toast.error(mutationError.message),
+  });
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -82,6 +92,10 @@ export default function Configuration() {
   }
 
   const voiceAdapters = data.integrations.filter(item => ["stt", "tts", "llm"].includes(item.integrationType));
+  const ttsAdapter = data.integrations.find(item => item.integrationType === "tts");
+  const ttsConfig = (ttsAdapter?.config ?? {}) as { voiceId?: string; voiceName?: string; modelId?: string; fallback?: string };
+  const selectedVoice = voices.data?.find(voice => voice.id === ttsConfig.voiceId);
+  const voiceErrorGuidance = voices.error ? voiceProviderGuidance(voices.error.message) : null;
 
   return (
     <div className="mx-auto max-w-[1500px] enter-soft">
@@ -154,12 +168,17 @@ export default function Configuration() {
           <div className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
             <Card className="border-0 bg-card/95 shadow-soft">
               <CardHeader><CardTitle className="flex items-center gap-2 text-base"><AudioLines className="h-4 w-4 text-primary" />Voice pipeline</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
+              <CardContent className="space-y-5">
+                <div className="rounded-2xl border bg-white/70 p-4">
+                  <div className="flex items-start justify-between gap-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.15em] text-primary">Clara’s speaking voice</p><p className="mt-1 text-sm font-semibold">Natural female ElevenLabs voice</p></div><StatusPill tone={voices.error ? "warning" : "success"}>{voices.isLoading ? "Loading" : voices.error ? "Unavailable" : "Connected"}</StatusPill></div>
+                  <div className="mt-4"><Label className="text-xs font-semibold">Voice</Label><Select value={ttsConfig.voiceId || "Xb7hH8MSUJpSbSDYk0k2"} onValueChange={voiceId => updateVoice.mutate({ voiceId })} disabled={voices.isLoading || updateVoice.isPending || !voices.data?.length}><SelectTrigger className="mt-2 h-11 bg-white"><SelectValue placeholder="Choose a female voice" /></SelectTrigger><SelectContent>{voices.data?.map(voice => <SelectItem key={voice.id} value={voice.id}>{voice.name}</SelectItem>)}</SelectContent></Select></div>
+                  <p className="mt-3 text-xs leading-5 text-muted-foreground">{voiceErrorGuidance ? `${voiceErrorGuidance.title}. ${voiceErrorGuidance.detail}` : selectedVoice?.description || "Alice provides a clear, friendly British voice suited to a professional dental reception desk."}</p>
+                </div>
                 {voiceAdapters.map(adapter => <div key={adapter.id} className="flex items-center justify-between rounded-2xl border bg-white/60 p-4"><div><p className="text-[10px] font-bold uppercase tracking-[0.15em] text-muted-foreground">{adapter.integrationType}</p><p className="mt-1 text-sm font-semibold">{adapter.provider.replaceAll("_", " ")}</p></div><StatusPill tone={adapter.enabled ? "success" : "neutral"}>{adapter.enabled ? "Active" : "Prepared"}</StatusPill></div>)}
               </CardContent>
             </Card>
             <Card className="border-0 bg-primary text-primary-foreground shadow-soft">
-              <CardContent className="p-6"><Mic2 className="h-6 w-6 text-emerald-300" /><h3 className="mt-5 font-display text-xl font-semibold">Browser-first, provider-ready.</h3><p className="mt-3 text-sm leading-6 text-primary-foreground/70">Microphone recordings are uploaded securely for server transcription, then enter the same audited call workflow as typed turns. Spoken playback uses the browser today; future telephony and TTS providers remain adapter settings.</p></CardContent>
+              <CardContent className="p-6"><Mic2 className="h-6 w-6 text-emerald-300" /><h3 className="mt-5 font-display text-xl font-semibold">A more human first impression.</h3><p className="mt-3 text-sm leading-6 text-primary-foreground/70">Clara now uses {ttsConfig.voiceName || "Alice"} through ElevenLabs’ low-latency speech model. The API key stays on the server, generated audio is not persisted, and browser speech remains available as a graceful fallback.</p><div className="mt-5 rounded-xl border border-white/15 bg-white/5 p-4 text-xs leading-5 text-primary-foreground/75">Model: {ttsConfig.modelId || "eleven_flash_v2_5"}<br />Fallback: {(ttsConfig.fallback || "browser_speech").replaceAll("_", " ")}</div><p className="mt-4 text-xs leading-5 text-primary-foreground/60">If the ElevenLabs credit balance or key usage limit is reached, the simulator reports the quota issue explicitly, preserves the transcript, and attempts the device voice fallback.</p></CardContent>
             </Card>
           </div>
         </TabsContent>

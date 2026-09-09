@@ -2,8 +2,10 @@ import { z } from "zod";
 import { publicProcedure, router } from "../_core/trpc";
 import { transcribeAudio } from "../_core/voiceTranscription";
 import { endCall, processTurn, transferCall } from "../agent/orchestrator";
-import { createCall, ensureDemoTenant, getCall } from "../db";
+import { addToolEvent, createCall, ensureDemoTenant, getCall, getVoiceIntegration } from "../db";
 import { storageGetSignedUrl, storagePut } from "../storage";
+import { DEFAULT_ELEVENLABS_VOICE } from "../../shared/voice";
+import { generateElevenLabsSpeech } from "../services/tts";
 
 async function demoTenant() {
   return ensureDemoTenant();
@@ -21,6 +23,26 @@ export const receptionRouter = router({
   turn: publicProcedure.input(z.object({ callId: z.number().int().positive(), utterance: z.string().trim().min(1).max(2000) })).mutation(async ({ input }) => {
     const tenant = await demoTenant();
     return processTurn(tenant.id, input.callId, input.utterance);
+  }),
+  speech: publicProcedure.input(z.object({
+    callId: z.number().int().positive(),
+    messageId: z.number().int().positive(),
+  })).mutation(async ({ input }) => {
+    const tenant = await demoTenant();
+    const data = await getCall(tenant.id, input.callId);
+    const message = data.messages.find(item => item.id === input.messageId && item.speaker === "agent");
+    if (!message) throw new Error("The requested agent message was not found in this call.");
+    const integration = await getVoiceIntegration(tenant.id);
+    const config = (integration?.config ?? {}) as { voiceId?: string; voiceName?: string };
+    const voiceId = config.voiceId || DEFAULT_ELEVENLABS_VOICE.id;
+    try {
+      const result = await generateElevenLabsSpeech(message.body, voiceId);
+      await addToolEvent(tenant.id, input.callId, "synthesize_speech", "success", { messageId: message.id }, { provider: result.provider, voiceId: result.voiceId, modelId: result.modelId });
+      return { ...result, voiceName: config.voiceName || DEFAULT_ELEVENLABS_VOICE.name };
+    } catch (error) {
+      await addToolEvent(tenant.id, input.callId, "synthesize_speech", "failure", { messageId: message.id }, { provider: "elevenlabs", error: error instanceof Error ? error.message : "Speech generation failed" });
+      throw error;
+    }
   }),
   transfer: publicProcedure.input(z.object({ callId: z.number().int().positive(), reason: z.string().trim().min(3).max(500) })).mutation(async ({ input }) => {
     const tenant = await demoTenant();

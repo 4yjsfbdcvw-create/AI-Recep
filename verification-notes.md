@@ -43,3 +43,11 @@ The original simulator only spoke an agent message after the user manually press
 Live verification call `CALL-DA6E9DF8` showed the precise no-device-voice guidance, a dedicated retry action, and a stable text fallback. A typed opening-hours question completed successfully with a tenant-grounded answer and tool evidence, and did not produce a second automatic playback error after the initial capability failure. The simulator’s responsive entry state was rechecked at 390 × 844.
 
 The microphone control was also rechecked in verification call `CALL-379984A9`. The sandbox has no available microphone device, and the simulator correctly preserved the active call while showing a recoverable “continue with typed messages” notice. This confirms microphone permission/device failures remain isolated from the new outgoing speech-response path.
+
+## ElevenLabs natural female voice upgrade
+
+The server credential passed live model and female English voice-catalog validation, and a short speech-generation smoke test returned a valid MP3. Clara's greeting and a subsequent tenant-grounded reply both generated and played automatically through ElevenLabs. The tenant voice selector persisted an alternative voice successfully; the delivered configuration uses the warm British female **Lily** voice.
+
+The simulator now provides generation and speaking states, mute, re-enable, replay, provider audit events, and browser-speech fallback. The practice setup page exposes the authorized female voice catalog and distinguishes quota exhaustion, authentication failures, rate limits, and general provider unavailability. The API credential remains server-only, generated audio is not persisted, and a tracked-source scan found no credential value.
+
+Final validation passed TypeScript, 26 automated tests across eight test files, the production build, desktop interaction checks, and a 390 × 844 responsive screenshot review.

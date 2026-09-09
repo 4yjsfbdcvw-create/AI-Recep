@@ -17,6 +17,7 @@ import {
   users,
 } from "../drizzle/schema";
 import type { CallContext } from "../shared/reception";
+import { DEFAULT_ELEVENLABS_VOICE } from "../shared/voice";
 import { ENV } from "./_core/env";
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -65,6 +66,12 @@ export async function ensureDemoTenant() {
   const db = await requireDb();
   const existing = (await db.select().from(tenants).where(eq(tenants.slug, "harbour-dental")).limit(1))[0];
   if (existing) {
+    if (process.env.ELEVENLABS_API_KEY) {
+      const currentTts = (await db.select().from(integrationConfigs).where(and(eq(integrationConfigs.tenantId, existing.id), eq(integrationConfigs.integrationType, "tts"))).limit(1))[0];
+      if (!currentTts || currentTts.provider !== "elevenlabs") {
+        await updateVoiceIntegration(existing.id, DEFAULT_ELEVENLABS_VOICE.id, DEFAULT_ELEVENLABS_VOICE.name);
+      }
+    }
     await ensureAvailabilitySlots(existing.id);
     return existing;
   }
@@ -116,7 +123,7 @@ export async function ensureDemoTenant() {
     { tenantId, integrationType: "calendar", provider: "internal_database", enabled: true, config: { systemOfRecord: true }, updatedAt: now },
     { tenantId, integrationType: "telephony", provider: "browser_simulator", enabled: true, config: { liveNumber: false }, updatedAt: now },
     { tenantId, integrationType: "stt", provider: "built_in_whisper", enabled: true, config: { language: "en" }, updatedAt: now },
-    { tenantId, integrationType: "tts", provider: "browser_speech", enabled: true, config: { voice: "system_default" }, updatedAt: now },
+    { tenantId, integrationType: "tts", provider: process.env.ELEVENLABS_API_KEY ? "elevenlabs" : "browser_speech", enabled: true, config: process.env.ELEVENLABS_API_KEY ? { voiceId: DEFAULT_ELEVENLABS_VOICE.id, voiceName: DEFAULT_ELEVENLABS_VOICE.name, fallback: "browser_speech" } : { voice: "system_default" }, updatedAt: now },
     { tenantId, integrationType: "email", provider: "adapter_not_configured", enabled: false, config: { mode: "future" }, updatedAt: now },
   ]);
 
@@ -190,6 +197,30 @@ export async function getPracticeBundle(tenantId: number) {
     db.select().from(integrationConfigs).where(eq(integrationConfigs.tenantId, tenantId)).orderBy(asc(integrationConfigs.id)),
   ]);
   return { tenant: tenant[0], services: serviceRows, hours: hourRows, knowledge: knowledgeRows, integrations };
+}
+
+export async function getVoiceIntegration(tenantId: number) {
+  const db = await requireDb();
+  return (await db.select().from(integrationConfigs).where(and(
+    eq(integrationConfigs.tenantId, tenantId),
+    eq(integrationConfigs.integrationType, "tts"),
+  )).limit(1))[0];
+}
+
+export async function updateVoiceIntegration(tenantId: number, voiceId: string, voiceName: string) {
+  const db = await requireDb();
+  const now = Date.now();
+  const config = { voiceId, voiceName, modelId: "eleven_flash_v2_5", fallback: "browser_speech" };
+  await db.insert(integrationConfigs).values({
+    tenantId,
+    integrationType: "tts",
+    provider: "elevenlabs",
+    enabled: true,
+    config,
+    updatedAt: now,
+  }).onDuplicateKeyUpdate({ set: { provider: "elevenlabs", enabled: true, config, updatedAt: now } });
+  await db.update(tenants).set({ voiceProvider: "elevenlabs", updatedAt: now }).where(eq(tenants.id, tenantId));
+  return getVoiceIntegration(tenantId);
 }
 
 export async function findService(tenantId: number, query: string) {
