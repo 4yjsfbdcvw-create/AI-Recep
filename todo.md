@@ -44,4 +44,4 @@
 - [x] Add tests for TTS request validation, provider fallback, and client audio state.
 - [x] Run final checks and browser verification, publish the ElevenLabs voice upgrade, and synchronize GitHub.
 - [x] Add explicit ElevenLabs quota and credit-exhaustion handling with distinct practice-setup guidance and browser fallback messaging.
-- [ ] Commit and push the validated ElevenLabs upgrade to GitHub, verify the remote SHA, and save the published checkpoint.
+- [x] Commit and push the validated ElevenLabs upgrade to GitHub, verify the remote SHA, and save the published checkpoint.
